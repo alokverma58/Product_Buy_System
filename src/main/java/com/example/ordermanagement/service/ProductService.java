@@ -62,6 +62,40 @@ public class ProductService {
         return mapToResponse(updatedProduct);
     }
 
+    @Transactional
+    public ProductResponse updateStock(String productId, Integer stock) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException("Product with ID " + productId + " not found"));
+        product.setStock(stock);
+        Product updatedProduct = productRepository.save(product);
+        return mapToResponse(updatedProduct);
+    }
+
+    @Transactional
+    public void deleteProduct(String productId) {
+        if (!productRepository.existsById(productId)) {
+            throw new ProductNotFoundException("Product with ID " + productId + " not found");
+        }
+        productRepository.deleteById(productId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getLowStockProducts(Integer threshold) {
+        return productRepository.findByStockLessThanEqual(threshold).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public long countProducts() {
+        return productRepository.count();
+    }
+
+    @Transactional(readOnly = true)
+    public long countLowStockProducts(Integer threshold) {
+        return productRepository.countByStockLessThanEqual(threshold);
+    }
+
     public ProductResponse mapToResponse(Product product) {
         return ProductResponse.builder()
                 .productId(product.getProductId())
