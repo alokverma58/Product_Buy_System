@@ -69,7 +69,6 @@ public class Address {
     public String getZipCode() {
         return zipCode;
     }
-//changes by alok
 
     public void setZipCode(String zipCode) {
         this.zipCode = zipCode;

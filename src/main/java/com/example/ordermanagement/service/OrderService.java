@@ -204,41 +204,6 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
-    public List<OrderResponse> getAllOrders() {
-        return orderRepository.findAll().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional
-    public OrderResponse updateOrderStatus(String orderId, OrderStatus newStatus) {
-        CustomerOrder order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Order with ID " + orderId + " not found"));
-        order.setStatus(newStatus);
-        CustomerOrder updatedOrder = orderRepository.save(order);
-        return mapToResponse(updatedOrder);
-    }
-
-    @Transactional(readOnly = true)
-    public long countOrders() {
-        return orderRepository.count();
-    }
-
-    @Transactional(readOnly = true)
-    public long countPendingOrders() {
-        return orderRepository.countByStatus(OrderStatus.PENDING);
-    }
-
-    @Transactional(readOnly = true)
-    public BigDecimal calculateTotalRevenue() {
-        return orderRepository.findAll().stream()
-                .filter(order -> order.getStatus() != OrderStatus.CANCELLED)
-                .map(CustomerOrder::getTotalAmount)
-                .filter(amount -> amount != null)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
     public OrderResponse mapToResponse(CustomerOrder order) {
         List<OrderItemResponse> itemResponses = order.getItems().stream()
                 .map(item -> OrderItemResponse.builder()
